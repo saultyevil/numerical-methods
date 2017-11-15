@@ -108,14 +108,15 @@ def dirk3(A, bvector, y0, interval, N):
     gamma = (3)/(2 * (3 + np.sqrt(3)))
     lamb = (3 * (1 + np.sqrt(3)))/(2 * (3 + np.sqrt(3)))
 
-    ident = np.identity(len(A)) - h * mu * A
+    matrix = np.identity(len(A)) - h * mu * A
 
     for n in range(N):
         # calculate the k values
-        k1 = np.linalg.solve(ident, y[:, n] + h * mu * bvector(x[n] + h * mu))
-        k2 = np.linalg.solve(ident, k1 + h * nu * (np.dot(A, k1) +
+        k1 = np.linalg.solve(matrix, y[:, n] + h * mu * bvector(x[n] + h * mu))
+        k2 = np.linalg.solve(matrix, k1 + h * nu * (np.dot(A, k1) +
                              bvector(x[n] + h * mu)) + h * mu *
-                             bvector([x[n] + h * nu + 2 * h * mu]))
+                             bvector(x[n] + h * nu + 2 * h * mu))
+
         # calculate y_n+1
         y[:, n+1] = (1 - lamb) * y[:, n] + lamb * k2 + h * gamma * \
             (np.dot(A, k2) + bvector(x[n] + h * nu + 2 * h * mu))
@@ -200,22 +201,22 @@ plt.show()
 fig_comparison = plt.figure(figsize=(15, 12))
 
 ax3 = fig_comparison.add_subplot(221)
-ax3.semilogy(x_rk3, y_rk3[0, :], label='rk3 y1')
+ax3.semilogy(x_rk3, y_rk3[0, :], linewidth=5, label='rk3 y1')
 ax3.semilogy(x_rk3, y_exact[0, :], '--', label='exact y1')
 ax3.legend()
 
 ax4 = fig_comparison.add_subplot(222)
-ax4.plot(x_rk3, y_rk3[1, :], label='rk3 y2')
+ax4.plot(x_rk3, y_rk3[1, :], linewidth=5, label='rk3 y2')
 ax4.plot(x_rk3, y_exact[1, :], '--', label='exact y2')
 ax4.legend()
 
 ax5 = fig_comparison.add_subplot(223)
-ax5.semilogy(x_dirk3, y_dirk3[0, :], label='dirk3 y1')
+ax5.semilogy(x_dirk3, y_dirk3[0, :], linewidth=5, label='dirk3 y1')
 ax5.semilogy(x_dirk3, y_exact[0, :], '--', label='exact y1')
 ax5.legend()
 
 ax6 = fig_comparison.add_subplot(224)
-ax6.plot(x_dirk3, y_dirk3[1, :], label='dirk3 y2')
+ax6.plot(x_dirk3, y_dirk3[1, :], linewidth=5, label='dirk3 y2')
 ax6.plot(x_dirk3, y_exact[1, :], '--', label='exact y2')
 ax6.legend()
 
@@ -225,3 +226,97 @@ plt.show()
 # =============================================================================
 # Task 4
 # =============================================================================
+
+
+def b(x):
+    # define the bvector function
+    return np.array([np.cos(10 * x) - 10 * np.sin(10 * x),
+                     199 * np.cos(10 * x) - 10 * np.sin(10 * x),
+                     208 * np.cos(10 * x) + 10000 * np.sin(10 * x)])
+
+
+A = np.array([[-1, 0, 0],
+              [-99, -100, 0],
+              [-10098, 9900, -10000]])
+
+y0 = [0, 1, 0]
+interval = [0, 1]
+
+# arrays for storing h value and error
+error_rk3_t4 = np.zeros((2, 13))
+error_dirk3_t4 = np.zeros((2, 13))
+
+for i, k in enumerate(range(4, 17)):
+    N = 200 * k
+    h = (interval[1] - interval[0])/N
+    error_rk3_t4[0, i] = h
+    error_dirk3_t4[0, i] = h
+
+    x_rk3_t4, y_rk3_t4 = rk3(A, b, y0, interval, N)
+    # ruh roh, it doesn't seem to converge for y3 for RK3:-(
+    x_dirk3_t4, y_dirk3_t4 = dirk3(A, b, y0, interval, N)
+
+    t4_exact = np.array([np.cos(10 * x_rk3_t4) - np.exp(-x_rk3_t4),
+                         np.cos(10 * x_rk3_t4) + np.exp(-x_rk3_t4) -
+                         np.exp(-100 * x_rk3_t4),
+                         np.sin(10 * x_rk3_t4) + 2 * np.exp(-x_rk3_t4) -
+                         np.exp(-100 * x_rk3_t4) - np.exp(-10000 * x_rk3_t4)])
+
+    error_dirk3_t4[1, i] = h * np.sum(np.abs((y_dirk3_t4[2, 1:] -
+                                              t4_exact[2, 1:]) /
+                                             t4_exact[2, 1:]))
+
+# plot the errors =============================================================
+dirk3_polyfit_t4 = np.polyfit(np.log(error_dirk3_t4[0, :-1]),
+                              np.log(error_dirk3_t4[1, :-1]), 1)
+
+fig_errors_t4 = plt.figure(figsize=(7.5, 6))
+
+ax1 = fig_errors_t4.add_subplot(111)
+ax1.loglog(error_dirk3_t4[0, :], error_dirk3_t4[1, :], 'kx')
+ax1.loglog(error_dirk3_t4[0, :],
+           np.exp(dirk3_polyfit_t4[1]) * error_dirk3_t4[0, :] **
+           (dirk3_polyfit_t4[0]),
+           label='DIRK3 line gradient: {:6.4f}'.format(dirk3_polyfit_t4[0]))
+ax1.set_xlabel('h')
+ax1.set_ylabel('error')
+ax1.legend()
+
+plt.savefig('task4_errors.pdf')
+plt.show()
+
+# plot the algorithm against the exact solution ===============================
+fig_comparison_t4 = plt.figure(figsize=(22.5, 12))
+
+ax2 = fig_comparison_t4.add_subplot(231)
+ax2.plot(x_rk3_t4, y_rk3_t4[0, :], linewidth=5, label='rk3 y1')
+ax2.plot(x_rk3_t4, t4_exact[0, :], '--', label='exact y1')
+ax2.legend()
+
+ax3 = fig_comparison_t4.add_subplot(232)
+ax3.plot(x_rk3_t4, y_rk3_t4[1, :], linewidth=5, label='rk3 y2')
+ax3.plot(x_rk3_t4, t4_exact[1, :], '--', label='exact y2')
+ax3.legend()
+
+ax4 = fig_comparison_t4.add_subplot(233)
+ax4.plot(x_rk3_t4, y_rk3_t4[2, :], linewidth=5, label='rk3 y3')
+ax4.plot(x_rk3_t4, t4_exact[2, :], '--', label='exact y3')
+ax4.legend()
+
+ax5 = fig_comparison_t4.add_subplot(234)
+ax5.plot(x_dirk3_t4, y_dirk3_t4[0, :], linewidth=5, label='dirk3 y1')
+ax5.plot(x_dirk3_t4, t4_exact[0, :], '--', label='exact y1')
+ax5.legend()
+
+ax6 = fig_comparison_t4.add_subplot(235)
+ax6.plot(x_dirk3_t4, y_dirk3_t4[1, :], linewidth=5, label='dirk3 y2')
+ax6.plot(x_dirk3_t4, t4_exact[1, :], '--', label='exact y2')
+ax6.legend()
+
+ax7 = fig_comparison_t4.add_subplot(236)
+ax7.plot(x_dirk3_t4, y_dirk3_t4[2, :], linewidth=5, label='dirk3 y3')
+ax7.plot(x_dirk3_t4, t4_exact[2, :], '--', label='exact y3')
+ax7.legend()
+
+plt.savefig('task4_comparison.pdf')
+plt.show()
