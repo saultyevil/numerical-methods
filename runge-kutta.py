@@ -167,8 +167,8 @@ for i, k in enumerate(np.arange(1, 11)):  # loop over the range of k values
 # compute the polyfits
 # if error = A * h^s, then linear line best fit of log(error) v log(h) will
 # have the slope s, e.g. the order of convergence
-rk3_polyfit = np.polyfit(np.log(error_rk3[0, :-1]),
-                         np.log(error_rk3[1, :-1]), 1)
+rk3_polyfit = np.polyfit(np.log(error_rk3[0, 1:-1]),
+                         np.log(error_rk3[1, 1:-1]), 1)
 dirk3_polyfit = np.polyfit(np.log(error_dirk3[0, :-1]),
                            np.log(error_dirk3[1, :-1]), 1)
 
@@ -201,28 +201,28 @@ plt.show()
 fig_comparison = plt.figure(figsize=(15, 12))
 
 ax3 = fig_comparison.add_subplot(221)
-ax3.semilogy(x_rk3, y_rk3[0, :], linewidth=5, label='RK3')
+ax3.semilogy(x_rk3, y_rk3[0, :], linewidth=2, label='RK3')
 ax3.semilogy(x_rk3, y_exact[0, :], '--', label='Exact')
 ax3.set_xlabel('x')
 ax3.set_ylabel('y1')
 ax3.legend()
 
 ax4 = fig_comparison.add_subplot(222)
-ax4.plot(x_rk3, y_rk3[1, :], linewidth=5, label='RK3')
+ax4.plot(x_rk3, y_rk3[1, :], linewidth=2, label='RK3')
 ax4.plot(x_rk3, y_exact[1, :], '--', label='Exact')
 ax4.set_xlabel('x')
 ax4.set_ylabel('y2')
 ax4.legend()
 
 ax5 = fig_comparison.add_subplot(223)
-ax5.semilogy(x_dirk3, y_dirk3[0, :], linewidth=5, label='DIRK3')
+ax5.semilogy(x_dirk3, y_dirk3[0, :], linewidth=2, label='DIRK3')
 ax5.semilogy(x_dirk3, y_exact[0, :], '--', label='Exact')
 ax5.set_xlabel('x')
 ax5.set_ylabel('y1')
 ax5.legend()
 
 ax6 = fig_comparison.add_subplot(224)
-ax6.plot(x_dirk3, y_dirk3[1, :], linewidth=5, label='DIRK3')
+ax6.plot(x_dirk3, y_dirk3[1, :], linewidth=2, label='DIRK3')
 ax6.plot(x_dirk3, y_exact[1, :], '--', label='Exact')
 ax6.set_xlabel('x')
 ax6.set_ylabel('y2')
@@ -275,8 +275,8 @@ for i, k in enumerate(range(4, 17)):
                                              t4_exact[2, 1:]))
 
 # plot the errors =============================================================
-dirk3_polyfit_t4 = np.polyfit(np.log(error_dirk3_t4[0, :-1]),
-                              np.log(error_dirk3_t4[1, :-1]), 1)
+dirk3_polyfit_t4 = np.polyfit(np.log(error_dirk3_t4[0, 2:-1]),
+                              np.log(error_dirk3_t4[1, 2:-1]), 1)
 
 fig_errors_t4 = plt.figure(figsize=(7.5, 6))
 
@@ -297,46 +297,46 @@ plt.show()
 fig_comparison_t4 = plt.figure(figsize=(22.5, 12))
 
 ax2 = fig_comparison_t4.add_subplot(231)
-ax2.plot(x_rk3_t4, y_rk3_t4[0, :], linewidth=5, label='RK3')
-ax2.plot(x_rk3_t4, t4_exact[0, :], '--', label='Exact')
-ax2.set_xlabel('x')
-ax2.set_ylabel('y1')
-ax2.legend()
+ax2.plot(t4_exact[0, :], y_rk3_t4[0, :], 'x', label='RK3')
+# ax2.plot(x_rk3_t4, t4_exact[0, :], '--', label='Exact')
+ax2.set_xlabel('y1 exact')
+ax2.set_ylabel('y1 RK3')
+# ax2.legend()
 
 ax3 = fig_comparison_t4.add_subplot(232)
-ax3.plot(x_rk3_t4, y_rk3_t4[1, :], linewidth=5, label='RK3')
-ax3.plot(x_rk3_t4, t4_exact[1, :], '--', label='Exact')
-ax3.set_xlabel('x')
-ax3.set_ylabel('y2')
-ax3.legend()
+ax3.plot(t4_exact[1, :], y_rk3_t4[1, :], 'x', label='RK3')
+# ax3.plot(x_rk3_t4, t4_exact[1, :], '--', label='Exact')
+ax3.set_xlabel('y2 exact')
+ax3.set_ylabel('y2 RK3')
+# ax3.legend()
 
 ax4 = fig_comparison_t4.add_subplot(233)
-ax4.plot(x_rk3_t4, y_rk3_t4[2, :], linewidth=5, label='RK3')
-ax4.plot(x_rk3_t4, t4_exact[2, :], '--', label='Exact')
-ax4.set_xlabel('x')
-ax4.set_ylabel('y3')
-ax4.legend()
+ax4.plot(t4_exact[2, :], y_rk3_t4[2, :], 'x', label='RK3')
+# ax4.plot(x_rk3_t4, t4_exact[2, :], '--', label='Exact')
+ax4.set_xlabel('y3 exact')
+ax4.set_ylabel('y3 RK3')
+# ax4.legend()
 
 ax5 = fig_comparison_t4.add_subplot(234)
-ax5.plot(x_dirk3_t4, y_dirk3_t4[0, :], linewidth=5, label='DIRK3')
-ax5.plot(x_dirk3_t4, t4_exact[0, :], '--', label='Exact')
-ax5.set_xlabel('x')
-ax5.set_ylabel('y1')
-ax5.legend()
+ax5.plot(t4_exact[0, :], y_dirk3_t4[0, :], 'x', label='DIRK3')
+# ax5.plot(x_dirk3_t4, t4_exact[0, :], '--', label='Exact')
+ax5.set_xlabel('y1 exact')
+ax5.set_ylabel('y1 DIRK3')
+# ax5.legend()
 
 ax6 = fig_comparison_t4.add_subplot(235)
-ax6.plot(x_dirk3_t4, y_dirk3_t4[1, :], linewidth=5, label='DIRK3')
-ax6.plot(x_dirk3_t4, t4_exact[1, :], '--', label='Exact')
-ax6.set_xlabel('x')
-ax6.set_ylabel('y2')
-ax6.legend()
+ax6.plot(t4_exact[1, :], y_dirk3_t4[1, :], 'x', label='DIRK3')
+# ax6.plot(x_dirk3_t4, t4_exact[1, :], '--', label='Exact')
+ax6.set_xlabel('y2 exact')
+ax6.set_ylabel('y2 DIRK')
+# ax6.legend()
 
 ax7 = fig_comparison_t4.add_subplot(236)
-ax7.plot(x_dirk3_t4, y_dirk3_t4[2, :], linewidth=5, label='DIRK3')
-ax7.plot(x_dirk3_t4, t4_exact[2, :], '--', label='Exact')
-ax7.set_xlabel('x')
-ax7.set_ylabel('y3')
-ax7.legend()
+ax7.plot(t4_exact[2, :], y_dirk3_t4[2, :], 'x', label='DIRK3')
+# ax7.plot(x_dirk3_t4, t4_exact[2, :], '--', label='Exact')
+ax7.set_xlabel('y3 exact')
+ax7.set_ylabel('y3 DIRK')
+# ax7.legend()
 
 plt.savefig('task4_comparison.pdf')
 plt.show()
