@@ -115,16 +115,17 @@ def hair_locations_phi_0(L, R, fg, fx, theta_0):
 
     z = 0.2  # the value for the initial guess used in the shooting method
 
-    theta_hair = np.zeros_like((n_hairs, n_points))
-    s_hair = np.zeroes((n_hairs, n_points))
+    theta_hair = np.zeros((n_hairs, n_points))
+    s_hair = np.zeros((n_hairs, n_points))
     # go through each hair and shoot for a solution theta(s)
-    for i in range(n_hairs):
-        s, theta = shooting_method(z, theta_0[i], boundary, fg, fx, n_points)
-        theta_hair[i, :] = theta
-        s_hair[i, :] = s
+    for hair in range(n_hairs):
+        s, theta = shooting_method(z, theta_0[hair], boundary, fg, fx,
+                                   n_points)
+        theta_hair[hair, :] = theta
+        s_hair[hair, :] = s
 
-    return theta_hair
+    return s_hair, theta_hair
 
 
 theta = np.linspace(0, np.pi, 2)
-theta_hair = hair_locations_phi_0(4, 10, 0.1, 0, theta)
+s_hair, theta_hair = hair_locations_phi_0(4, 10, 0.1, 0, theta)
