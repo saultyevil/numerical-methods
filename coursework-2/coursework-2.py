@@ -56,8 +56,8 @@ def plot_on_circular_head(R, x_hair, z_hair, fg, fx):
     fig = plt.figure()
 
     ax1 = fig.add_subplot(111)
-    ax1.set_xlim(-15, 15)
-    ax1.set_ylim(-15, 15)
+    ax1.set_xlim(-R - 5, R + 5)
+    ax1.set_ylim(-R - 5, R + 5)
     ax1.set_xlabel(r"$x$")
     ax1.set_ylabel(r"$z$")
 
@@ -116,25 +116,25 @@ def plot_on_circular_head_3d(R, x_hair, y_hair, z_hair, fg, fx):
 
     # subplot for x, z plane
     ax1 = fig.add_subplot(121)
-    ax1.set_xlim(-15, 15)
-    ax1.set_ylim(-15, 15)
+    ax1.set_xlim(-R - 5, R + 5)
+    ax1.set_ylim(-R - 5, R + 5)
     ax1.set_xlabel(r"$x$")
     ax1.set_ylabel(r"$z$")
+    plt.gca().set_aspect('equal')
     # subplot for y, z plane
     ax2 = fig.add_subplot(122)
-    ax2.set_xlim(-15, 15)
-    ax2.set_ylim(-15, 15)
+    ax2.set_xlim(-R - 5, R + 5)
+    ax2.set_ylim(-R - 5, R + 5)
     ax2.set_xlabel(r"$y$")
     ax2.set_ylabel(r"$z$")
+    plt.gca().set_aspect('equal')  # I seem to need to do this twice
 
     # plot a circle for the 2D head slice. No heads were harmed in the
     # making of these head slices
     ax1.plot(x, z, 'b-')
     ax1.plot(x, -z, 'b-')
-    plt.gca().set_aspect('equal')
     ax2.plot(y, z, 'b-')
     ax2.plot(y, -z, 'b-')
-    plt.gca().set_aspect('equal')  # I seem to need to do this twice
 
     # plot the individual hairs
     for hair in range(n_hairs):
@@ -172,6 +172,8 @@ def plot_on_sphereical_head(R, x_hair, y_hair, z_hair, fg, fx):
     console window and saved to the working directory.
     """
 
+    n_hairs = x_hair.shape[0]
+
     # generate theta and phi values for a sphere
     theta = np.linspace(0, 2 * np.pi, 1000)
     phi = np.linspace(0, 2 * np.pi, 1000)
@@ -184,18 +186,23 @@ def plot_on_sphereical_head(R, x_hair, y_hair, z_hair, fg, fx):
     y = R * np.sin(PHI) * np.sin(THETA)
     z = R * np.cos(PHI)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12, 12))
 
     ax1 = fig.add_subplot(111, projection='3d')
-    ax1.set_xlim(-15, 15)
-    ax1.set_ylim(-15, 15)
-    ax1.set_zlim(-15, 15)
+    ax1.set_xlim(-R - 5, R + 5)
+    ax1.set_ylim(-R - 5, R + 5)
+    ax1.set_zlim(-R - 5, R + 5)
     ax1.set_xlabel(r'$x$')
     ax1.set_ylabel(r'$y$')
     ax1.set_zlabel(r'$z$')
+    plt.gca().set_aspect('equal')
 
     # plot the sphere using the carterisan coordinates
     ax1.plot_surface(x, y, z)
+
+    # plot each hair individually so I can use a line instead of x's or o's
+    for hair in range(n_hairs):
+        ax1.scatter(x_hair[hair, :], y_hair[hair, :], z_hair[hair, :], '-')
 
     plt.savefig('hair_3d_fg={}, fx={}.pdf'.format(fg, fx))
     plt.show()
@@ -459,11 +466,11 @@ thetas = np.linspace(0, np.pi, n_hairs)
 
 fx = 0  # no wind
 x_coords, z_coords = hair_locations_2d(L, R, fg, fx, thetas)
-plot_on_circular_head(10, x_coords, z_coords, fg, fx)
+plot_on_circular_head(R, x_coords, z_coords, fg, fx)
 
-fx = 0.1  # a bit of wind
+fx = 0.1  # introduce a bit of wind
 x_coords, z_coords = hair_locations_2d(L, R, fg, fx, thetas)
-plot_on_circular_head(10, x_coords, z_coords, fg, fx)
+plot_on_circular_head(R, x_coords, z_coords, fg, fx)
 
 
 # =============================================================================
@@ -679,26 +686,27 @@ def hair_locations_3d(L, R, fg, fx, theta_0, phi_0):
         The x, z coordinates of each hair.
     """
 
-    n_grid = theta_0.shape[0]
-    n_hairs = n_grid * n_grid
+    n_grid_theta = theta_0.shape[0]
+    n_grid_phi = phi_0.shape[0]
+    n_hairs = n_grid_theta * n_grid_phi
     n_points = 100
     boundary = [0, L]
 
-    z_theta = 0.1
+    z_theta = 0.01
     z_phi = 0.1
-    z_guess = np.zeros((n_grid, n_grid))
-    z_guess[:, :] = 0.1
+    z_guess = np.zeros((2, n_grid_theta, n_grid_phi))
+    z_guess[:, :, :] = z_theta
 
     if np.abs(fx) > 0:
         # if there is wind, use the root for the no wind case as the initial
         # guess for the wind case.
         print('Calculating initial guess values using no wind...')
-        for i in range(n_hairs):
-            for j in range(n_hairs):
-                # iterate through the hairs and find the theta prime value used
-                # for each hair in the no wind hair
+        for i in range(n_grid_theta - 1):
+            for j in range(n_grid_phi - 1):
+                # create a list for the z guess at the location theta, phi
+                z_guesses = [z_guess[0, i, j], z_guess[1, i, j]]
                 z_guess_wind = shooting_3d(
-                    z_guess[i, j], theta_0[i, j], phi_0[i, j], boundary, fg,
+                    z_guesses, theta_0[i, j], phi_0[i, j], boundary, fg,
                     fx, n_points, root_return=True)
                 z_guess[i, j] = z_guess_wind
 
@@ -707,11 +715,14 @@ def hair_locations_3d(L, R, fg, fx, theta_0, phi_0):
     z_coords = np.zeros((n_hairs, n_points))
 
     # go through each hair and shoot for a solution theta(s)
-    for i in range(n_grid):
-        for j in range(n_grid):
+    hair = 0  # counter variable to track the hair we are on
+    for i in range(n_grid_theta - 1):
+        for j in range(n_grid_phi - 1):
+            # create a list for the z guess at the location theta, phi
+            z_guesses = [z_guess[0, i, j], z_guess[1, i, j]]
             # calculate the s and theta parameters for an individual hair
             h, theta_hair, phi_hair = shooting_3d(
-                z_guess[i, j], theta_0[i, j], phi_0[i, j], boundary, fg, fx,
+                z_guesses, theta_0[i, j], phi_0[i, j], boundary, fg, fx,
                 n_points)
 
             # calculate the initial conditions for the x, z coords
@@ -720,19 +731,23 @@ def hair_locations_3d(L, R, fg, fx, theta_0, phi_0):
             z_0 = R * np.sin(theta_0[i, j])
 
             # call the Euler step to calculate the x, z coordinates of the hair
-            x_coords[i, j], y_coords[i, j], z_coords[i, j] = \
+            x_coords[hair, :], y_coords[hair, :], z_coords[hair, :] = \
                 euler_step_3d(
                     h, theta_hair, phi_hair, x_0, y_0, z_0)
 
-    return x_coords, y_coords, z_coords
+            # increment the hair counter, so it goes to the next hair on the
+            # next loop of the grid
+            hair += 1
 
+    return x_coords, y_coords, z_coords
 
 # create the mesh grid of theta and phi positions for the hair locations
 thetas = np.linspace(0, 0.49 * np.pi, 10)
 phis = np.linspace(0, np.pi, 10)
 THETA, PHI = np.meshgrid(thetas, phis)
 
-fx = 0.05  # just a little bit of wind
+fx = 0  # use this for testing purposes
+# fx = 0.05  # just a little bit of wind
 x_coords, y_coords, z_coords = hair_locations_3d(L, R, fg, fx, THETA, PHI)
 plot_on_circular_head_3d(R, x_coords, y_coords, z_coords, fg, fx)
 plot_on_sphereical_head(R, x_coords, y_coords, z_coords, fg, fx)
