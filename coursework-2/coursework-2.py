@@ -179,7 +179,7 @@ def plot_on_sphereical_head(R, x_hair, y_hair, z_hair, fg, fx):
     phi = np.linspace(0, 2 * np.pi, 1000)
 
     # create a meshgrid of the theta and phi values
-    PHI, THETA = np.meshgrid(theta, phi)
+    THETA, PHI = np.meshgrid(theta, phi)
 
     # calculate the x, y, z coordinates for the sphere
     x = R * np.sin(PHI) * np.cos(THETA)
@@ -195,6 +195,7 @@ def plot_on_sphereical_head(R, x_hair, y_hair, z_hair, fg, fx):
     ax1.set_xlabel(r'$x$')
     ax1.set_ylabel(r'$y$')
     ax1.set_zlabel(r'$z$')
+    ax1.view_init(elev=30, azim=245)
     plt.gca().set_aspect('equal')
 
     # plot the sphere using the carterisan coordinates
@@ -209,7 +210,7 @@ def plot_on_sphereical_head(R, x_hair, y_hair, z_hair, fg, fx):
 
 
 # =============================================================================
-# Task 1 Functions
+# 2D Problem
 # =============================================================================
 
 def shooting_2d(z, theta_0, boundary, fg, fx, n_points, root_return=False):
@@ -474,7 +475,7 @@ plot_on_circular_head(R, x_coords, z_coords, fg, fx)
 
 
 # =============================================================================
-# Task 4
+# 3D Problem
 # =============================================================================
 
 def shooting_3d(z, theta_0, phi_0, boundary, fg, fx, n_points,
@@ -708,7 +709,8 @@ def hair_locations_3d(L, R, fg, fx, theta_0, phi_0):
                 z_guess_wind = shooting_3d(
                     z_guesses, theta_0[i, j], phi_0[i, j], boundary, fg,
                     fx, n_points, root_return=True)
-                z_guess[i, j] = z_guess_wind
+                z_guess[0, i, j] = z_guess_wind[0]
+                z_guess[1, i, j] = z_guess_wind[1]
 
     x_coords = np.zeros((n_hairs, n_points))
     y_coords = np.zeros((n_hairs, n_points))
@@ -740,6 +742,7 @@ def hair_locations_3d(L, R, fg, fx, theta_0, phi_0):
             hair += 1
 
     return x_coords, y_coords, z_coords
+
 
 # create the mesh grid of theta and phi positions for the hair locations
 thetas = np.linspace(0, 0.49 * np.pi, 10)
