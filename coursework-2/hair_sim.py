@@ -494,8 +494,9 @@ def shooting_3d(z, theta_0, phi_0, boundary, fg, fx, n_points,
 
     Parameters
     ----------
-    z: float.
-        The value of the initial guess for theta prime at s = 0.
+    z: list of floats, [theta', phi'].
+            The value of the initial guess for theta prime and phi prime
+            at s = 0.
     theta_0: n x n array of floats, where n x n = n_hairs.
         The initial lattitude angle of each hair. Theta_0 needs to be part of a
         meshgrid of theta_0 and phi_0.
@@ -552,8 +553,9 @@ def shooting_3d(z, theta_0, phi_0, boundary, fg, fx, n_points,
 
         Parameters
         ----------
-        z: float.
-            The value of the initial guess for theta prime at s = 0.
+        z: list of floats, [theta', phi'].
+            The value of the initial guess for theta prime and phi prime
+            at s = 0.
 
         Returns
         -------
@@ -582,8 +584,9 @@ def shooting_3d(z, theta_0, phi_0, boundary, fg, fx, n_points,
 
         Parameters
         ----------
-        z_guess: float.
-            The value of the initial guess for theta prime at s = 0.
+        z: list of floats, [theta', phi'].
+            The value of the initial guess for theta prime and phi prime
+            at s = 0.
         phi: function.
             The function to root find, i.e. phi(z).
 
