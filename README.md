@@ -11,6 +11,6 @@ My solutions to the class test.
 
 # coursework-2
 ## hair_sim
-  A simulation of hair using spherical polar dimension in 2 and 3 dimensions. The shooting method is employed to solve a system of two coupled second order differential equations.
+  A simulation of hair using polar coordinates in 2 and 3 dimensions. The shooting method is employed to solve a system of two coupled second order differential equations.
 ## shooting-attempt
-  Generic method for shooting to solve a BVP.
+  Generic algorithm for shooting to solve a BVP.
