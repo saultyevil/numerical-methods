@@ -9,3 +9,7 @@ Python scripts developed as part of the MATH6141 Numerical Methods module at the
   A simulation of hair using polar coordinates in 2 and 3 dimensions. The boundary value problem shooting method is employed to solve a system of two coupled second order differential equations.
 ## shooting-attempt
   Generic algorithm for shooting to solve a BVP.
+
+## Acknowledgements 
+
+I would like to acknowledge financial support from the EPSRC Centre for Doctoral Training in Next Generation Computational Modelleing grant EP/L015382/1.
